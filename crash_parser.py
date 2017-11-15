@@ -1,4 +1,5 @@
 from __future__ import division
+from mysql_interface import Mysql
 import os, re
 import gzip, csv
 import datetime
@@ -26,10 +27,10 @@ def parseBugs(bug_str):
         return [aBug.strip() for aBug in bug_str.split(',')]
     
 def makeUserKey(os_name, os_version, cpu_info, crash_date, install_age):
-    install_time = computeInstallTime(crash_date, install_age)
+    #install_time = computeInstallTime(crash_date, install_age)
     '''precise install time to hour, convert it to string
     timeStr = install_time.replace(hour = 0, minute = 0, second = 0).strftime('%Y%m%d%H')'''
-    timeStr = install_time.strftime('%Y%m%d%H%M%S')     
+    #timeStr = install_time.strftime('%Y%m%d%H%M%S')     
     if(user_key_mode == 'time'):
         return timeStr
     elif(user_key_mode == 'machine'):
@@ -123,34 +124,28 @@ def crashTriage(crash_report):
 
 #   Parse files in the selected period
 def parseFiles(folderList, beginDate, endDate):
+    mysql = Mysql()
     total_reports = 0
-    for thisFolder in folderList:
-        #   folders should with digital names and within the selected period
-        if(re.search(r'^[0-9]+$', thisFolder) and thisFolder >= beginDate and thisFolder <= endDate):  
-            print 'Processing ' + thisFolder + ' ...'
-            folderPath = os.getcwd() + '/crash_report/' + thisFolder
-            with gzip.open(folderPath + '/' + thisFolder +'-pub-crashdata.csv.gz', 'rb') as csvfile:
-                reader = csv.reader(csvfile, delimiter = '\t')
-                next(csvfile, None)      #   omit header
-                #   Extract metrics from a crash report
-                for line in reader:
-                    #   put metrics in a dictionary
-                    crash_report = {'signature': line[0],
-                                    'crash_date': strToDate(line[3]),
-                                    'process_date': strToDate(line[4]),
-                                    'product': line[6],
-                                    'version': line[7],
-                                    'bug_str': line[14],
-                                    'up_seconds': line[16],
-                                    'install_age': line[-4], 
-                                    'os_name': line[10],
-                                    'os_version': line[11],
-                                    'cpu_info': line[12]}
-                    if(crash_report['product'].lower() == product.lower()):   # analysis by product
-                        #   Triage the crash report by user and bug
-                        crashTriage(crash_report)
-                        #   Count total reports
-                        total_reports += 1
+    for line in mysql.generateCrash():
+        #   put metrics in a dictionary
+        crash_report = {'signature': line[1],
+                        'crash_date': line[3],
+                        'process_date': line[3],
+                        'product': 'libreoffice',
+                        'version': line[8],
+                        'bug_str': line[12],
+                        'up_seconds': 0,
+                        'install_age': 0, 
+                        'os_name': line[4],
+                        'os_version': line[5],
+                        'cpu_info': line[6],
+                        'build': line[7],
+                        'opengl': (line[10] or "") + (line[11] or "1")}
+        if(crash_report['product'].lower() == product.lower()):   # analysis by product
+            #   Triage the crash report by user and bug
+            crashTriage(crash_report)
+            #   Count total reports
+            total_reports += 1
     return total_reports
 
 #   Build the total user list of a bug by concatenating the user lists of each related crash type
@@ -247,9 +242,9 @@ def outputVersionBugs():
     return
 
 if(__name__ == '__main__'):
-    user_key_mode = raw_input('Please choose the mode for entropy computing (time/machine):\n')
+    user_key_mode = "machine"
     print ''
-    product = raw_input('Please choose the analysed product (Firefox/FennecAndroid):\n').lower()
+    product = "libreoffice"
     print ''
             
     #   Initialize variables
