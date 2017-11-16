@@ -45,9 +45,9 @@ wilcoxon_test_for_signed <- function(data)
 	wilcox.test(multi_entropy, single_entropy, correct=FALSE)
 }
 
-data <- read.csv(sprintf('metrics/%s_metrics_machine.csv', product), header = TRUE)
+data <- read.csv(sprintf('bugs/libreoffice_metrics_machine.csv', product), header = TRUE)
 
-datasign <- read.csv(sprintf('metrics/firefox_signature_entropy.csv', product), header = TRUE)
+datasign <- read.csv(sprintf('bugs/libreoffice_signature_entropy_machine.csv', product), header = TRUE)
 
 print('the entropy for multibugs and single bug crashes are same')
 wilcoxon_test_for_signed(datasign)

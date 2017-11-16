@@ -2,13 +2,7 @@ from __future__ import division
 import csv
 import MySQLdb
 from numpy import median, percentile
-
-# initialize the MySQL service
-def initDatabase():
-    #   Please set the database host, user and password here
-    database = MySQLdb.connect(host = 'localhost', user = 'root', passwd = 'your_passwd', db = dbname, port = 3306)
-    cursor = database.cursor()
-    return cursor
+from mysql_bug_interface import Mysqlbug
 
 # build bug list
 def buildBugList():
@@ -27,23 +21,16 @@ def buildBugList():
     return (inputDict, entropy_cutoff, frequency_cutoff)
 
 # determine whether a bug report has invalid status
-def hasInvalid(bugID):
-    cursor.execute('SELECT added FROM bugs_activity WHERE bug_id = ' + bugID)
-    results = cursor.fetchall()
-    invalid_status = False
-    for r in results:
-        if(r[0] == 'INVALID' or r[0] == 'WONTFIX' or r[0] == 'WORKSFORME' or r[0] == 'DUPLICATE'):
-            invalid_status = True
-            break
-    if(invalid_status == True):
+def hasInvalid(bug):
+    r = bug['resolution']
+    if(r == 'INVALID' or r == 'WONTFIX' or r == 'WORKSFORME' or r == 'DUPLICATE'):
         return 'YES'
     else:
         return 'NO'
 
-def isClosed(bugID):
-    cursor.execute('SELECT bug_status FROM bugs WHERE bug_id = ' + bugID)
-    results = cursor.fetchall()
-    if(results[0][0] == 'VERIFIED' or results[0][0] == 'RESOLVED'):
+def isClosed(bug):
+    r = bug['status']
+    if(r == 'VERIFIED' or r == 'RESOLVED'):
         return 1
     else:
         return 0
@@ -58,68 +45,49 @@ def patchCount(bugID):
             patch_cnt += 1
     return patch_cnt
 
-# count reopened times
-def reopenedCount(bugID):
-    cursor.execute('SELECT added FROM bugs_activity WHERE bug_id = ' + bugID)
-    results = cursor.fetchall()
-    reopened_cnt = 0
-    for r in results:
-        if(r[0] == 'REOPENED'):
-            reopened_cnt += 1
-    return reopened_cnt
-
 def developerCount(bugID):
     cursor.execute('SELECT COUNT(DISTINCT who) FROM bugs_activity where bug_id = ' + bugID)
     results = cursor.fetchall()
     return results[0][0]
 
 # extract metrics from bug database
-def extractMetrics(cursor, inputDict):
+def extractMetrics(mysqlbugdb, inputDict):
     print 'Extracting metrics ...'
     bugDict = dict()
     for bugID in inputDict:
-        metricDict = dict()
-        # creat_time, bug_title, platform, severity, priority, last_modified_time, reporter, assignee 
-        cursor.execute('SELECT  creation_ts, short_desc, rep_platform, bug_severity, priority, \
-                                delta_ts, reporter, assigned_to, component_id \
-                                FROM bugs WHERE bug_id = ' + bugID)
-        results = cursor.fetchall()
-        if(len(results)):
-            tpl = results[0]
-            metricDict['create_time'] = tpl[0]
-            metricDict['title'] = tpl[1]
-            metricDict['platform'] = tpl[2]
-            metricDict['severity'] = tpl[3]
-            metricDict['priority'] = tpl[4]
-            metricDict['last_modified'] = tpl[5]
-            metricDict['reporter'] = tpl[6]
-            metricDict['assignee'] = tpl[7]
-            metricDict['component'] = tpl[8]            
+        bug = mysqlbugdb.getBug(bugID)
+        if(bug):
+            metricDict = {}
+            metricDict['create_time'] = bug['create_time']
+            metricDict['title'] = bug['sign']
+            metricDict['platform'] = None
+            metricDict['severity'] = bug['severity']
+            metricDict['priority'] = bug['priority']
+            metricDict['last_modified'] = bug['last_modified']
+            metricDict['reporter'] = None
+            metricDict['assignee'] = None
+            metricDict['component'] = None            
             # cc_count
-            cursor.execute('SELECT COUNT(DISTINCT who) FROM cc WHERE bug_id = ' + bugID)
-            results = cursor.fetchall()
-            metricDict['cc_count'] = int(results[0][0])
+            metricDict['cc_count'] = bug['cc_count']
             # comment
-            cursor.execute('SELECT comments FROM bugs_fulltext where bug_id = ' + bugID)
-            results = cursor.fetchall()
-            metricDict['comment'] = results[0][0]
+            metricDict['comment'] = bug['comment_count']
             # attachment
-            metricDict['patch_count'] = patchCount(bugID)
+            metricDict['patch_count'] = 0
             # invalid_status
-            metricDict['invalid'] = hasInvalid(bugID)
+            metricDict['invalid'] = hasInvalid(bug)
             # reopened_count
-            metricDict['reopened_count'] = reopenedCount(bugID)
+            metricDict['reopened_count'] = None
             # developer_count
-            metricDict['developer_count'] = developerCount(bugID)
+            metricDict['developer_count'] = None
             # is closed
-            metricDict['is_closed'] = isClosed(bugID)
+            metricDict['is_closed'] = isClosed(bug)
             # uptime
             metricDict['uptime'] = inputDict[bugID][2]
             # fixed time (if not fixed, fixed_time = -1)
-            metricDict['fixing_time'] = computeFixingTime(bugID, cursor, metricDict['create_time'])
-            componentOfBug(bugID, cursor)
+            metricDict['fixing_time'] = computeFixingTime(bug)
+            componentOfBug(bugID)
             # bug triaging time
-            metricDict['triaging_time'] = triagingDuration(bugID, cursor, tpl[0])
+            metricDict['triaging_time'] = computeFixingTime(bug)
             # Add bugID/metrics to the bug dict
             bugDict[bugID] = metricDict
         else:
@@ -146,25 +114,23 @@ def computeExperience(userDict, thisUser):
         return 1
 
 # compute the fixing time
-def computeFixingTime(bugID, cursor, create_time):
-    cursor.execute('SELECT added, bug_when FROM bugs_activity WHERE bug_id = ' + bugID)
-    results = cursor.fetchall()
-    for result in results:
-        if(result[0] == 'RESOLVED'):
-            fixed_time = result[1]
-            return round((fixed_time - create_time).total_seconds(), 2)
+def computeFixingTime(bug):
+    if(bug['status'] == 'RESOLVED'):
+        create_time = bug['create_time']
+        fixed_time = bug['last_modified']
+        return round((fixed_time - create_time).total_seconds(), 2)
     return -1
 
 # return the component of a bug
-def componentOfBug(bugID, cursor):
-    cursor.execute('SELECT name FROM products WHERE id = (SELECT product_id FROM bugs WHERE bug_id = ' + bugID + ')')
-    results = cursor.fetchall()
-    #if(results[0][0] != 'Core'):
-    #print 'product', results[0][0]
-    cursor.execute('SELECT name FROM components WHERE id = (SELECT component_id FROM bugs WHERE bug_id = ' + bugID + ')')
-    results = cursor.fetchall()
-    #print 'component', results[0][0]
-    component_set.add(results[0][0])
+def componentOfBug(bugID):
+    # cursor.execute('SELECT name FROM products WHERE id = (SELECT product_id FROM bugs WHERE bug_id = ' + bugID + ')')
+    # results = cursor.fetchall()
+    # #if(results[0][0] != 'Core'):
+    # #print 'product', results[0][0]
+    # cursor.execute('SELECT name FROM components WHERE id = (SELECT component_id FROM bugs WHERE bug_id = ' + bugID + ')')
+    # results = cursor.fetchall()
+    # #print 'component', results[0][0]
+    component_set.add('')#results[0][0])
     return
 
 # triaging duration
@@ -199,9 +165,9 @@ def outputMetrics(bugDict, inputDict):
     print 'Outputing metrics ...'
     reporterDict, assigneeDict = dict(), dict()
     if(sensitivity_level == 50):
-        csv_writer = csv.writer(open('metrics/' + product + '_metrics_' + criteria + '.csv', 'wb'))
+        csv_writer = csv.writer(open('entropy_analysis/bugs/' + product + '_metrics_' + criteria + '.csv', 'wb'))
     else:
-        csv_writer = csv.writer(open('metrics/sensitivity_data/' + product + '_' + str(sensitivity_level) + '.csv', 'wb'))
+        csv_writer = csv.writer(open('entropy_analysis/bugs/' + product + '_' + str(sensitivity_level) + '.csv', 'wb'))
     csv_writer.writerow(['bugID', 'hour', 'week_day', 'month_day', 'month', 'year_day', 'component', \
                         'title_size', 'platform', 'severity', 'priority', 'cc_count', 'comment_size', \
                         'invalid_status', 'is_closed', 'patch_count', 'fixing_time', 'reopened_count', 'triaging_time',\
@@ -217,7 +183,7 @@ def outputMetrics(bugDict, inputDict):
         priority = metricDict['priority']
         cc_count = metricDict['cc_count']
         component = metricDict['component']
-        comment_size = len(metricDict['comment'].split())
+        comment_size = metricDict['comment']
         invalid_status = metricDict['invalid']
         is_closed = metricDict['is_closed']
         uptime = metricDict['uptime']
@@ -241,15 +207,16 @@ def outputMetrics(bugDict, inputDict):
 
 if(__name__ == '__main__'):
     component_set = set()
-    product = 'firefox'
+    product = 'libreoffice'
     criteria = 'machine'
     sensitivity_level = 50
 
-    csvfile = csv.reader(open('bugs/' + product + '_entropy_' + criteria + '.csv', 'rb'))
+    csvfile = csv.reader(open('entropy_analysis/bugs/' + product + '_entropy_' + criteria + '.csv', 'rb'))
     next(csvfile, None)
-    cursor = initDatabase()
+    mysqlbugdb = Mysqlbug()
     (inputDict, entropy_cutoff, frequency_cutoff) = buildBugList()
-    bugDict = extractMetrics(cursor, inputDict)
+
+    bugDict = extractMetrics(mysqlbugdb, inputDict)
     outputMetrics(bugDict, inputDict)
     
     comp_list = sorted(list(component_set))

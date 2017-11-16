@@ -1,0 +1,80 @@
+signature,entropy,frequency,bug_count
+SdrObject::SetOrdNum(unsigned long),0.5909308773263657,1653,1
+"SalAbort(rtl::OUString const &,bool)",0.6289533138014004,32974,7
+com::sun::star::uno::BaseReference::operator==(com::sun::star::uno::XInterface *),0.41713485362359365,50,1
+SdrMark::GetMarkedSdrObj(),0.5616057008104357,244,1
+basegfx::B2DPolygon::getB2DPoint(unsigned long),0.4343824657385115,50,2
+_RtlUserThreadStart,0.432002899916546,7260,1
+SvListView::Impl::ActionRemoving(SvTreeListEntry *),0.5327032086522212,269,1
+cuilo.dll,0.3058146027963009,21,1
+ig9icd32.dll,0.25234110245056407,4959,1
+StarBASIC::`vector deleting destructor'(unsigned int),0.5458181074388827,14336,1
+"std::vector<oox::xls::FormulaBuffer::TokenAddressItem,std::allocator<oox::xls::FormulaBuffer::TokenAddressItem> >::push_back(oox::xls::FormulaBuffer::TokenAddressItem &&)",0.5123956795263476,727,1
+gdi32full.dll,0.3914939876790899,55,1
+"ScPostIt::CreateCaption(ScAddress const &,SdrCaptionObj const *)",0.44330746022665607,51,2
+std::_Ptr_base<ImplAllSettingsData>::_Reset<ImplAllSettingsData>(std::_Ptr_base<ImplAllSettingsData> const &),0.45550072266792185,1137,1
+"SalFrame::SetCallback(vcl::Window *,bool (*)(vcl::Window *,SalEvent,void const *))",0.6549143013266017,38736,11
+SwEditWin::TimerHandler(Timer *),0.5314275678411704,155,1
+"SfxItemSet::Get(unsigned short,bool)",0.6596257089936183,19680,4
+sclo.dll,0.45290431687334487,50,2
+SfxUndoManager::ImplUndo(SfxUndoContext *),0.5271253019565295,707,1
+SdTransferable::ObjectReleased(),0.6409970901874827,36322,3
+ntdll.dll,0.5292191716712146,7059,2
+UnoWrapper::WindowDestroyed(vcl::Window *),0.512435728554287,405,1
+ScPostIt::UpdateCaptionPos(ScAddress const &),0.3603525859894946,50,1
+mergedlo.dll,0.6359720499792211,21914,26
+sfx2::sidebar::Panel::GetTitleBar(),0.6175925540623548,1698,1
+MSWordExportBase::GetItem(unsigned short),0.6338888658620153,28887,6
+StarBASIC::~StarBASIC(),0.6198852916779711,2664,1
+"SfxItemPool::Put(SfxPoolItem const &,unsigned short)",0.5303797187137829,371638,5
+"ImpEditEngine::GetI18NScriptType(EditPaM const &,long *)",0.3934377754357767,51,1
+SwNode::FindTableNode(),0.6142086395420129,2172,1
+dxcanvas::BitmapCanvasHelper::clear(),0.37887443712432795,50,1
+ne_addr_resolve,0.42300878427494526,50,1
+"vcl::Window::setPosSizePixel(long,long,long,long,PosSizeFlags)",0.5438096066832312,9560,1
+`VclBuilder::VclBuilder'::`1'::catch$0,0.4033766539518485,48,1
+BigPtrArray::Index2Block(unsigned long),0.42514843686457765,66,1
+"FontPrevWin_Impl::DrawPrev(OutputDevice &,Printer *,Point &,SvxFont const &)",0.4296378287469936,50,1
+atioglxx.dll,0.563332299261986,9063,4
+CharAttribList::DeleteEmptyAttribs(SfxItemPool &),0.44681146496747326,51,1
+SfxBaseModel::getArgs(),0.4240111746629582,93810,2
+osl_releaseMutex,0.39929818476458334,51,1
+ScTransferObj::~ScTransferObj(),0.6647782798252792,8953,3
+MenuFloatingWindow::ImplScroll(bool),0.44082996458801804,52,1
+"ResMgr::GetStringWithoutHook(rtl::OUString &,unsigned char const *)",0.41091134743047814,110,2
+"SwWriteTable::SwWriteTable(SwTable const *,SwHTMLTableLayout const *)",0.5871715537957339,20233,7
+SfxObjectShell::GetBaseModel(),0.6622724696203679,11878,1
+"chart::PieChart::performLabelBestFitInnerPlacement(chart::PieChart::ShapeParam &,chart::PieChart::PieLabelInfo &)",0.3276758548898725,49,1
+atio6axx.dll,0.40537400813967644,51,1
+OpenGLSalGraphicsImpl::doFlush(),0.5750457456508345,19879,1
+SwPosition::SwPosition(SwNode const &),0.6038574209406236,1001,1
+"FloatingWindow::ImplEndPopupMode(FloatWinPopupEndFlags,VclPtr<vcl::Window> const &)",0.39346527576120466,50,1
+SfxViewShell::GetViewFrame(),0.6205884717873412,765,1
+rtl_uString_acquire,0.5595499659169196,250,4
+salhelper::Thread::launch(),0.4022157022178095,50,1
+osl_acquireMutex,0.5540294733596289,264,3
+SdrObjList::GetObjCount(),0.5908479532294223,572,1
+sw::ClientIteratorBase::ClientIteratorBase(SwModify const &),0.4298624546518699,100,1
+"VirtualDevice::ImplInitVirDev(OutputDevice const *,long,long,DeviceFormat,SystemGraphicsData const *)",0.5903789459008567,1377,1
+MSONSEXT.DLL,0.35276006808613897,50,1
+"`anonymous namespace'::lcl_checkClassification(SwDoc *,SwDoc *)",0.664198092177226,23815,4
+vcl::Window::ImplGrabFocus(GetFocusFlags),0.6121699109957027,2588,6
+memcpy,0.43454544966164044,41,1
+ImplReleaseTempFonts(SalData &),0.37760177228457564,52,2
+sfx2::sidebar::Panel::SetExpanded(bool),0.6501197016642938,10467,3
+ImplHandleUserEvent,0.2757600815999149,50,2
+windows.storage.dll,0.490879842564779,1097,1
+vcl::Window::dispose(),0.6208672756579539,39034,7
+com::sun::star::datatransfer::DataFormatTranslator::create(com::sun::star::uno::Reference<com::sun::star::uno::XComponentContext> const &),0.638267416540681,29043,1
+"TransformItems(unsigned short,SfxItemSet const &,com::sun::star::uno::Sequence<com::sun::star::beans::PropertyValue> &,SfxSlot const *)",0.40357068979425725,35754,2
+swlo.dll,0.6174043346162628,1321,1
+SfxModule::GetResMgr(),0.6599910093196975,2091,1
+Application::RemoveUserEvent(ImplSVEvent *),0.45364450990875316,51,1
+SwNode::RemoveAnchoredFly(SwFrameFormat *),0.5743608326828799,719,2
+rtl_uString_assign,0.4619044570296578,52,5
+ScCondFormatDlg::OkPressed(),0.3858441429644334,50,1
+shell32.dll,0.5891285502397733,1507,1
+SdrHdl::SetSelected(bool),0.6302430449101052,9773,1
+SdrObject::GetViewContact(),0.5133423925307211,117,1
+SfxItemPool::IsInRange(unsigned short),0.6200093215560264,535,1
+"`anonymous namespace'::SaxWriterHelper::AddBytes(signed char *,unsigned long &,signed char const *,unsigned long)",0.5253727776411202,857,1

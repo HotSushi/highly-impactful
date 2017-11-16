@@ -58,35 +58,4 @@ class Mysql():
             self.signtobug[result[0]] = result[1]
         cursor.close()
 
-    # def generateCrash(self):
-    #     cursor = self.database.cursor() 
-    #     limit = 2000
-    #     lastid = '0'
-    #     with open('meta.json') as metadata:
-    #         data = json.load(metadata)
-    #         if('lastid' in data):lastid=data["lastid"]    
-    #     while True:
-    #         cursor.execute("""
-    #             SELECT id, sign, url, crash_date, os_name, os_version, cpu_info, build, version, reason, opengldriver, opengldevice,
-    #             (
-    #              SELECT GROUP_CONCAT(bugs.id SEPARATOR ',') 
-    #               FROM bugs 
-    #               WHERE bugs.sign = crash.sign
-    #             ) AS bugz
-    #             FROM crash 
-    #             WHERE sign IN 
-    #             (select distinct signature.sign from signature, bugs where signature.sign = bugs.sign) 
-    #             AND
-    #             crash.id > '%s'
-    #             LIMIT %s;
-    #         """%(lastid, str(limit))
-    #         )
-    #         results = cursor.fetchall()
-    #         if(len(results)==0):
-    #             break
-    #         for result in results:
-    #             lastid = result[0]
-    #             yield result
-    #         with open('meta.json', 'w') as outfile:
-    #             data = {"lastid": lastid}
-    #             json.dump(data, outfile)
+   
